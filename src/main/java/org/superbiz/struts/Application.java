@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Bean;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterRegistration;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 @SpringBootApplication
 public class Application {
@@ -19,25 +23,25 @@ public class Application {
     }
 
     @Bean
-    FilterRegistrationBean siteMeshFilter(){
-        Filter siteMeshFilter = new SiteMeshFilter();
-        ServletRegistrationBean registrationBean = new ServletRegistrationBean();
-        registrationBean.addUrlMappings("/*");
-        return new FilterRegistrationBean(siteMeshFilter, registrationBean);
+    public FilterRegistrationBean filterDispatch() {
+        return buildFilterRegistration(2, new StrutsPrepareAndExecuteFilter(),
+                Arrays.asList("/", "/addUserForm.action", "/addUser.action",
+                        "/findUserForm.action", "/findUser.action",
+                        "/listAllUsers.action"));
     }
 
     @Bean
-    FilterRegistrationBean strutsPrepareAndExecuteFilter(){
-        Filter strutsPrepareAndExecuteFilter = new StrutsPrepareAndExecuteFilter();
-        ServletRegistrationBean registrationBean = new ServletRegistrationBean();
-        registrationBean.addUrlMappings("/");
-        registrationBean.addUrlMappings("/addUserForm.action");
-        registrationBean.addUrlMappings("/addUser.action");
-        registrationBean.addUrlMappings("/findUserForm.action");
-        registrationBean.addUrlMappings("/findUser.action");
-        registrationBean.addUrlMappings("/listAllUsers.action");
+    public FilterRegistrationBean sitemeshPageFilter() {
+        return buildFilterRegistration(1, new SiteMeshFilter(),
+                singletonList("/*"));
+    }
 
-        return new FilterRegistrationBean(strutsPrepareAndExecuteFilter, registrationBean);
+    private FilterRegistrationBean buildFilterRegistration(int order, Filter filter, List<String> urlPatterns) {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(filter);
+        registration.setUrlPatterns(urlPatterns);
+        registration.setOrder(order);
+        return registration;
     }
 
 
